@@ -23,8 +23,9 @@ export async function onRequest(context) {
             ]
         };
         
-        // Ensure tursoUrl doesn't end with a slash
-        const baseUrl = tursoUrl.endsWith("/") ? tursoUrl.slice(0, -1) : tursoUrl;
+        // Ensure tursoUrl doesn't end with a slash and uses https://
+        let baseUrl = tursoUrl.endsWith("/") ? tursoUrl.slice(0, -1) : tursoUrl;
+        baseUrl = baseUrl.replace(/^libsql:\/\//, 'https://').replace(/^wss:\/\//, 'https://');
         
         const res = await fetch(`${baseUrl}/v2/pipeline`, {
             method: "POST",

@@ -67,6 +67,8 @@ async function handlePlayerInput() {
         const res = await fetch(`/api/poem?action=check&sentence=${encodeURIComponent(input)}`);
         const data = await res.json();
         
+        if (data.error) throw new Error(data.error);
+        
         if (data.exists) {
             usedPoems.push(input);
             score += 10;
@@ -87,6 +89,7 @@ async function handlePlayerInput() {
             }, 1000);
         }
     } catch (e) {
+        console.error("Fetch error:", e);
         showMessage("网络连接异常，暂作通过！加 10 分。");
         usedPoems.push(input);
         score += 10;
