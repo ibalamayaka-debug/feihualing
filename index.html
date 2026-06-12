@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飞花令</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>飞花令</h1>
+            <p class="subtitle">花间一壶酒，独酌无相亲</p>
+        </header>
+
+        <main>
+            <div id="setup-area">
+                <button id="start-btn">抽取令字</button>
+            </div>
+
+            <div id="game-area" class="hidden">
+                <div class="status">
+                    <span class="keyword-display">本局令字：<strong id="current-keyword"></strong></span>
+                    <span class="score-display">得分：<strong id="score">0</strong></span>
+                </div>
+
+                <div class="input-section">
+                    <input type="text" id="player-input" placeholder="请输入含令字的诗句..." autocomplete="off">
+                    <button id="submit-btn">对句</button>
+                </div>
+
+                <div id="message-box" class="message"></div>
+
+                <div class="chat-history" id="chat-history">
+                    <!-- 对话历史记录 -->
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>国风小游戏 · 诗词数据库基于本地精选库</p>
+        </footer>
+    </div>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
