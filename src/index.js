@@ -1,3 +1,5 @@
+import * as OpenCC from 'opencc-js';
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -11,6 +13,9 @@ export default {
     return env.ASSETS.fetch(request);
   },
 };
+
+const s2tConverter = OpenCC.Converter({ from: 'cn', to: 'tw' });
+const t2sConverter = OpenCC.Converter({ from: 'tw', to: 'cn' });
 
 async function handleApiRequest(url, env) {
   const action = url.searchParams.get("action");
@@ -82,11 +87,14 @@ async function handleApiRequest(url, env) {
           headers,
         });
 
-      const cleanSentence = sentence.replace(/[，。？！、\s]/g, "");
+      // User might enter simplified, convert to traditional for DB search
+      const traditionalSentence = s2tConverter(sentence);
+      const cleanSentence = traditionalSentence.replace(/[，。？！、\s]/g, "");
       const prefix = cleanSentence.substring(0, 4);
 
+      // Fetch more rows to avoid limit clipping issues
       const rows = await queryTurso(
-        "SELECT paragraphs FROM poems WHERE paragraphs LIKE '%' || ? || '%' LIMIT 10",
+        "SELECT paragraphs FROM poems WHERE paragraphs LIKE '%' || ? || '%' LIMIT 100",
         [prefix]
       );
 
@@ -101,18 +109,23 @@ async function handleApiRequest(url, env) {
       }
       return new Response(JSON.stringify({ exists }), { headers });
     } else if (action === "computer") {
-      const keyword = url.searchParams.get("keyword");
+      const keywordRaw = url.searchParams.get("keyword");
       const usedStr = url.searchParams.get("used") || "";
       const used = usedStr ? usedStr.split(",") : [];
 
-      if (!keyword)
+      if (!keywordRaw)
         return new Response(JSON.stringify({ error: "Missing keyword" }), {
           status: 400,
           headers,
         });
 
+      // Convert keyword and used sentences to traditional
+      const keyword = s2tConverter(keywordRaw);
+      const cleanUsed = used.map((u) => s2tConverter(u).replace(/[，。？！、\s]/g, ""));
+
+      // Fetch 100 random rows containing the keyword
       const rows = await queryTurso(
-        "SELECT paragraphs FROM poems WHERE paragraphs LIKE '%' || ? || '%' ORDER BY RANDOM() LIMIT 30",
+        "SELECT paragraphs FROM poems WHERE paragraphs LIKE '%' || ? || '%' ORDER BY RANDOM() LIMIT 100",
         [keyword]
       );
 
@@ -126,8 +139,7 @@ async function handleApiRequest(url, env) {
           const cleanS = s.trim();
           if (cleanS.length >= 4 && cleanS.includes(keyword)) {
             const strippedS = cleanS.replace(/[，。？！、\s]/g, "");
-            const cleanUsed = used.map((u) => u.replace(/[，。？！、\s]/g, ""));
-
+            
             let isUsed = false;
             for (let u of cleanUsed) {
               if (u && strippedS.includes(u)) {
@@ -144,7 +156,9 @@ async function handleApiRequest(url, env) {
       }
 
       if (candidates.length > 0) {
-        const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+        let chosen = candidates[Math.floor(Math.random() * candidates.length)];
+        // Convert the traditional poem back to simplified for the user
+        chosen = t2sConverter(chosen);
         return new Response(JSON.stringify({ poem: chosen }), { headers });
       } else {
         return new Response(JSON.stringify({ poem: null }), { headers });
