@@ -31,8 +31,19 @@ async function handleApiRequest(url, env) {
   }
 
   async function queryTurso(sql, args = []) {
+    // Convert args to Turso HTTP API format
+    const formattedArgs = args.map(arg => {
+        if (typeof arg === 'string') return { type: "text", value: arg };
+        if (typeof arg === 'number') {
+            return Number.isInteger(arg) ? { type: "integer", value: arg.toString() } : { type: "float", value: arg };
+        }
+        if (typeof arg === 'boolean') return { type: "integer", value: arg ? "1" : "0" };
+        if (arg === null) return { type: "null" };
+        return { type: "text", value: String(arg) };
+    });
+
     const body = {
-      requests: [{ type: "execute", stmt: { sql, args } }, { type: "close" }],
+      requests: [{ type: "execute", stmt: { sql, args: formattedArgs } }, { type: "close" }],
     };
 
     let baseUrl = tursoUrl.endsWith("/") ? tursoUrl.slice(0, -1) : tursoUrl;
