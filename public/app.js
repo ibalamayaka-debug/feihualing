@@ -73,11 +73,11 @@ async function handlePlayerInput() {
             usedPoems.push(input);
             score += 10;
             scoreDisplay.innerText = score;
-            showMessage("对答如流！加 10 分。");
+            showMessage(`对答如流！加 10 分。\n出自：${data.source || '未知'}`);
             
             setTimeout(() => {
                 computerTurn();
-            }, 1000);
+            }, 1500);
         } else {
             showMessage("才疏学浅，数据库里未找到这句诗，算你赢！加 10 分。");
             usedPoems.push(input);
@@ -86,7 +86,7 @@ async function handlePlayerInput() {
             
             setTimeout(() => {
                 computerTurn();
-            }, 1000);
+            }, 1500);
         }
     } catch (e) {
         console.error("Fetch error:", e);
@@ -97,7 +97,7 @@ async function handlePlayerInput() {
         
         setTimeout(() => {
             computerTurn();
-        }, 1000);
+        }, 1500);
     }
 }
 
@@ -111,7 +111,8 @@ async function computerTurn() {
         
         if (data.poem) {
             usedPoems.push(data.poem);
-            addSystemMsg(data.poem);
+            const formattedMsg = `${data.poem}<br><span class="poem-source">—— ${data.source || '未知'}</span>`;
+            addSystemMsg(formattedMsg);
             showMessage("轮到你了！");
         } else {
             // 电脑词穷了

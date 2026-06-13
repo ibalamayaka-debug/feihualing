@@ -94,20 +94,25 @@ async function handleApiRequest(url, env) {
 
       // Fetch more rows to avoid limit clipping issues
       const rows = await queryTurso(
-        "SELECT paragraphs FROM poems WHERE paragraphs LIKE '%' || ? || '%' LIMIT 100",
+        "SELECT dynasty, author, title, paragraphs FROM poems WHERE paragraphs LIKE '%' || ? || '%' LIMIT 100",
         [prefix]
       );
 
       let exists = false;
+      let source = "";
       for (let row of rows) {
-        if (!row[0] || !row[0].value) continue;
-        const text = row[0].value.replace(/[，。？！、\s]/g, "");
+        if (!row[3] || !row[3].value) continue;
+        const text = row[3].value.replace(/[，。？！、\s]/g, "");
         if (text.includes(cleanSentence)) {
           exists = true;
+          const dynasty = t2sConverter(row[0]?.value || "");
+          const author = t2sConverter(row[1]?.value || "");
+          const title = t2sConverter(row[2]?.value || "");
+          source = `[${dynasty}] ${author}《${title}》`;
           break;
         }
       }
-      return new Response(JSON.stringify({ exists }), { headers });
+      return new Response(JSON.stringify({ exists, source }), { headers });
     } else if (action === "computer") {
       const keywordRaw = url.searchParams.get("keyword");
       const usedStr = url.searchParams.get("used") || "";
@@ -125,14 +130,14 @@ async function handleApiRequest(url, env) {
 
       // Fetch 100 random rows containing the keyword
       const rows = await queryTurso(
-        "SELECT paragraphs FROM poems WHERE paragraphs LIKE '%' || ? || '%' ORDER BY RANDOM() LIMIT 100",
+        "SELECT dynasty, author, title, paragraphs FROM poems WHERE paragraphs LIKE '%' || ? || '%' ORDER BY RANDOM() LIMIT 100",
         [keyword]
       );
 
       let candidates = [];
       for (let row of rows) {
-        if (!row[0] || !row[0].value) continue;
-        const text = row[0].value;
+        if (!row[3] || !row[3].value) continue;
+        const text = row[3].value;
         const sentences = text.split(/[，。？！\n]/);
 
         for (let s of sentences) {
@@ -149,7 +154,13 @@ async function handleApiRequest(url, env) {
             }
 
             if (!isUsed) {
-              candidates.push(cleanS);
+              const dynasty = t2sConverter(row[0]?.value || "");
+              const author = t2sConverter(row[1]?.value || "");
+              const title = t2sConverter(row[2]?.value || "");
+              candidates.push({
+                text: cleanS,
+                source: `[${dynasty}] ${author}《${title}》`
+              });
             }
           }
         }
@@ -158,8 +169,8 @@ async function handleApiRequest(url, env) {
       if (candidates.length > 0) {
         let chosen = candidates[Math.floor(Math.random() * candidates.length)];
         // Convert the traditional poem back to simplified for the user
-        chosen = t2sConverter(chosen);
-        return new Response(JSON.stringify({ poem: chosen }), { headers });
+        chosen.text = t2sConverter(chosen.text);
+        return new Response(JSON.stringify({ poem: chosen.text, source: chosen.source }), { headers });
       } else {
         return new Response(JSON.stringify({ poem: null }), { headers });
       }
