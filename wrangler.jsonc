@@ -7,6 +7,10 @@
     "directory": "./public",
     "binding": "ASSETS"
   },
+  "vars": {
+    "TURSO_DATABASE_URL": "libsql://poetry-slim-ymxl97.aws-ap-south-1.turso.io",
+    "TURSO_AUTH_TOKEN": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODEzMjE4NDksImlkIjoiMDE5ZWEwNWQtODcwMS03YTFmLTljNDQtZjdmZWU1NGFhMWVlIiwicmlkIjoiMGIxZGVjMGYtNThjMy00ODEyLWI2Y2ItZDlmNzY4NjUwNTJmIn0.bTS3u0stU484BhviRAjEtZGcZqiO42nvMIaHxAmNwvpY9b1l6zEmaSkA5quSj7hvATFdZcGSOpNX8d92SM0vBg"
+  },
   "observability": {
     "enabled": true
   }
