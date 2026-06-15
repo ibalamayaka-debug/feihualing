@@ -177,8 +177,9 @@ surrenderBtn.addEventListener("click", () => {
     if (activePlayers.length === 1 && allPlayers.length > 1) {
         // 只有一个人剩下
         updatePvpUI();
-        addSystemMsg(`游戏结束！${activePlayers[0].name} 获胜！`);
-        showMessage(`游戏结束`);
+        addSystemMsg(`恭喜，${activePlayers[0].name}获得胜利！`);
+        showMessage(`恭喜，${activePlayers[0].name}获得胜利！`);
+        triggerConfetti();
         finishMultiplayerGame();
     } else if (activePlayers.length === 0) {
         updatePvpUI();
@@ -204,7 +205,7 @@ function finishMultiplayerGame() {
     setTimeout(() => {
         setupArea.classList.remove("hidden");
         gameArea.classList.add("hidden");
-    }, 3000);
+    }, 5000);
 }
 
 // 提交诗词
@@ -334,7 +335,8 @@ async function computerTurn() {
 
 function endGame() {
     addSystemMsg("我词穷了，你赢了！");
-    showMessage(`恭喜通关！最终得分：${score}`);
+    showMessage(`恭喜，你获得胜利！最终得分：${score}`);
+    triggerConfetti();
     
     setTimeout(() => {
         setupArea.classList.remove("hidden");
@@ -342,7 +344,7 @@ function endGame() {
         startBtn.innerText = "再来一局";
         inputField.disabled = false;
         submitBtn.disabled = false;
-    }, 3000);
+    }, 5000);
 }
 
 function addPlayerMsg(text) {
@@ -378,4 +380,28 @@ function showMessage(msg) {
 
 function scrollToBottom() {
     chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+function triggerConfetti() {
+    if (typeof confetti === "function") {
+        var duration = 3 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        var interval = setInterval(function() {
+            var timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            var particleCount = 50 * (timeLeft / duration);
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+            confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+        }, 250);
+    }
 }
