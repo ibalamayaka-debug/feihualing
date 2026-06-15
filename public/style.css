@@ -217,3 +217,44 @@ footer {
     text-align: right;
     font-style: italic;
 }
+
+.mode-controls {
+    flex-direction: row;
+    gap: 30px;
+    font-size: 1.2rem;
+}
+
+.mode-label {
+    cursor: pointer;
+}
+
+#player-count {
+    width: 60px;
+    text-align: center;
+    font-size: 1rem;
+    padding: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: var(--font-main);
+}
+
+.player-display {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.eliminated {
+    text-decoration: line-through;
+    color: #999;
+}
+
+#surrender-btn {
+    background-color: transparent;
+    border-color: #999;
+    color: #666;
+}
+
+#surrender-btn:hover {
+    background-color: #999;
+    color: var(--bg-color);
+}

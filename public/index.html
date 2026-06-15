@@ -15,6 +15,14 @@
 
         <main>
             <div id="setup-area">
+                <div class="setup-controls mode-controls">
+                    <label class="mode-label"><input type="radio" name="game-mode" value="pve" checked> 人机对战</label>
+                    <label class="mode-label"><input type="radio" name="game-mode" value="pvp"> 多人模式</label>
+                </div>
+                <div id="pvp-settings" class="setup-controls hidden" style="margin-top: 10px;">
+                    <label>玩家人数 (1-20): <input type="number" id="player-count" min="1" max="20" value="2"></label>
+                </div>
+                <div class="divider" style="margin-top: 30px;"><span>开局方式</span></div>
                 <div class="setup-controls">
                     <button id="start-btn">随机抽签</button>
                     <div class="divider"><span>或</span></div>
@@ -28,12 +36,15 @@
             <div id="game-area" class="hidden">
                 <div class="status">
                     <span class="keyword-display">本局令字：<strong id="current-keyword"></strong></span>
-                    <span class="score-display">得分：<strong id="score">0</strong></span>
+                    <span class="player-display hidden" id="current-player-display">玩家 1</span>
+                    <span class="score-display" id="pve-score-display">得分：<strong id="score">0</strong></span>
                 </div>
+                <div id="multiplayer-scores" class="hidden status" style="font-size: 1rem; flex-wrap: wrap; gap: 10px;"></div>
 
                 <div class="input-section">
                     <input type="text" id="player-input" placeholder="请输入含令字的诗句..." autocomplete="off">
                     <button id="submit-btn">对句</button>
+                    <button id="surrender-btn" class="hidden">认输</button>
                 </div>
 
                 <div id="message-box" class="message"></div>
