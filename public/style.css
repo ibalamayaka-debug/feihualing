@@ -258,3 +258,19 @@ footer {
     background-color: #999;
     color: var(--bg-color);
 }
+
+.player-name-input {
+    padding: 8px;
+    font-size: 1rem;
+    font-family: var(--font-main);
+    border: 1px solid var(--border-color);
+    background: rgba(255,255,255,0.7);
+    border-radius: 4px;
+    text-align: center;
+    width: 200px;
+}
+
+.player-name-input:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}

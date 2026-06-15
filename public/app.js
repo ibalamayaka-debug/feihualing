@@ -5,7 +5,8 @@ let usedPoems = [];
 // Multiplayer variables
 let gameMode = 'pve';
 let totalPlayers = 1;
-let activePlayers = [];
+let allPlayers = []; // {id, name}
+let activePlayers = []; // {id, name}
 let currentPlayerTurnIdx = 0;
 let playerScores = {};
 
@@ -28,14 +29,40 @@ const chatHistory = document.getElementById("chat-history");
 const modeRadios = document.querySelectorAll('input[name="game-mode"]');
 const pvpSettings = document.getElementById("pvp-settings");
 const playerCountInput = document.getElementById("player-count");
+const playerNamesContainer = document.getElementById("player-names-container");
 
 const keywords = ["春", "花", "秋", "月", "风", "雪", "夜", "云", "雨", "山", "水", "人"];
+
+function renderNameInputs() {
+    let count = parseInt(playerCountInput.value) || 2;
+    if (count < 1) count = 1;
+    if (count > 20) count = 20;
+
+    const existingInputs = playerNamesContainer.querySelectorAll('input');
+    const existingNames = Array.from(existingInputs).map(i => i.value);
+
+    playerNamesContainer.innerHTML = "";
+    for(let i=0; i<count; i++) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "player-name-input";
+        input.placeholder = `玩家 ${i+1} 姓名`;
+        if (existingNames[i]) {
+            input.value = existingNames[i];
+        }
+        playerNamesContainer.appendChild(input);
+    }
+}
+
+playerCountInput.addEventListener("change", renderNameInputs);
+playerCountInput.addEventListener("input", renderNameInputs);
 
 // 监听模式切换
 modeRadios.forEach(r => {
     r.addEventListener("change", (e) => {
         if (e.target.value === 'pvp') {
             pvpSettings.classList.remove("hidden");
+            renderNameInputs();
         } else {
             pvpSettings.classList.add("hidden");
         }
@@ -66,11 +93,17 @@ function startGame(keyword) {
         if (totalPlayers < 1) totalPlayers = 1;
         if (totalPlayers > 20) totalPlayers = 20;
         
+        const nameInputs = playerNamesContainer.querySelectorAll('input');
+        
+        allPlayers = [];
         activePlayers = [];
         playerScores = {};
-        for(let i=1; i<=totalPlayers; i++) {
-            activePlayers.push(i);
-            playerScores[i] = 0;
+        for(let i=0; i<totalPlayers; i++) {
+            let name = nameInputs[i].value.trim() || `玩家 ${i+1}`;
+            let playerObj = { id: i+1, name: name };
+            allPlayers.push(playerObj);
+            activePlayers.push(playerObj);
+            playerScores[playerObj.id] = 0;
         }
         currentPlayerTurnIdx = 0;
         
@@ -81,7 +114,7 @@ function startGame(keyword) {
         
         updatePvpUI();
         
-        addSystemMsg(`多人模式游戏开始！由 玩家 ${activePlayers[currentPlayerTurnIdx]} 先开始，请说出一句带有【${currentKeyword}】字的诗词。`);
+        addSystemMsg(`多人模式游戏开始！由 ${activePlayers[currentPlayerTurnIdx].name} 先开始，请说出一句带有【${currentKeyword}】字的诗词。`);
     }
     
     setupArea.classList.add("hidden");
@@ -117,16 +150,17 @@ customKeywordInput.addEventListener("keypress", (e) => {
 
 function updatePvpUI() {
     if (activePlayers.length > 0) {
-        currentPlayerDisplay.innerText = `玩家 ${activePlayers[currentPlayerTurnIdx]}`;
+        currentPlayerDisplay.innerText = `${activePlayers[currentPlayerTurnIdx].name}`;
     }
     
     let html = "";
-    for(let i=1; i<=totalPlayers; i++) {
-        const isEliminated = !activePlayers.includes(i);
-        const isActive = (activePlayers.length > 0 && i === activePlayers[currentPlayerTurnIdx]);
+    for(let i=0; i<allPlayers.length; i++) {
+        const p = allPlayers[i];
+        const isEliminated = !activePlayers.find(ap => ap.id === p.id);
+        const isActive = (activePlayers.length > 0 && activePlayers[currentPlayerTurnIdx].id === p.id);
         const activeClass = isActive ? "highlight" : "";
         const eliminatedClass = isEliminated ? "eliminated" : "";
-        html += `<span class="${activeClass} ${eliminatedClass}">玩家 ${i}: ${playerScores[i]}分</span>`;
+        html += `<span class="${activeClass} ${eliminatedClass}">${p.name}: ${playerScores[p.id]}分</span>`;
     }
     multiplayerScores.innerHTML = html;
 }
@@ -136,14 +170,14 @@ surrenderBtn.addEventListener("click", () => {
     if (gameMode !== 'pvp') return;
     
     const currentPlayer = activePlayers[currentPlayerTurnIdx];
-    addSystemMsg(`玩家 ${currentPlayer} 认输了！被淘汰！`);
+    addSystemMsg(`${currentPlayer.name} 认输了！被淘汰！`);
     
     activePlayers.splice(currentPlayerTurnIdx, 1);
     
-    if (activePlayers.length === 1 && totalPlayers > 1) {
+    if (activePlayers.length === 1 && allPlayers.length > 1) {
         // 只有一个人剩下
         updatePvpUI();
-        addSystemMsg(`游戏结束！玩家 ${activePlayers[0]} 获胜！`);
+        addSystemMsg(`游戏结束！${activePlayers[0].name} 获胜！`);
         showMessage(`游戏结束`);
         finishMultiplayerGame();
     } else if (activePlayers.length === 0) {
@@ -156,7 +190,7 @@ surrenderBtn.addEventListener("click", () => {
             currentPlayerTurnIdx = 0;
         }
         updatePvpUI();
-        addSystemMsg(`轮到 玩家 ${activePlayers[currentPlayerTurnIdx]} 了！`);
+        addSystemMsg(`轮到 ${activePlayers[currentPlayerTurnIdx].name} 了！`);
         showMessage("请出句...");
         inputField.focus();
     }
@@ -186,7 +220,7 @@ async function handlePlayerInput() {
     if (!input) return;
 
     inputField.value = "";
-    let prefix = gameMode === 'pvp' ? `[玩家 ${activePlayers[currentPlayerTurnIdx]}] ` : "";
+    let prefix = gameMode === 'pvp' ? `[${activePlayers[currentPlayerTurnIdx].name}] ` : "";
     const playerBubble = addPlayerMsg(prefix + input);
 
     if (!input.includes(currentKeyword)) {
@@ -251,14 +285,14 @@ function handleCorrectInput(input, source, playerBubble, fromDb, fromError) {
     } else {
         // PvP
         const currentPlayer = activePlayers[currentPlayerTurnIdx];
-        playerScores[currentPlayer] += 10;
+        playerScores[currentPlayer.id] += 10;
         
         // Next player turn
         currentPlayerTurnIdx = (currentPlayerTurnIdx + 1) % activePlayers.length;
         
         setTimeout(() => {
             updatePvpUI();
-            addSystemMsg(`轮到 玩家 ${activePlayers[currentPlayerTurnIdx]} 了！`);
+            addSystemMsg(`轮到 ${activePlayers[currentPlayerTurnIdx].name} 了！`);
             showMessage("请出句...");
             inputField.disabled = false;
             submitBtn.disabled = false;
