@@ -46,7 +46,7 @@ async function handlePlayerInput() {
     if (!input) return;
 
     inputField.value = "";
-    addPlayerMsg(input);
+    const playerBubble = addPlayerMsg(input);
 
     if (!input.includes(currentKeyword)) {
         showMessage(`这句诗里没有包含【${currentKeyword}】字哦，请重试！`);
@@ -73,7 +73,8 @@ async function handlePlayerInput() {
             usedPoems.push(input);
             score += 10;
             scoreDisplay.innerText = score;
-            showMessage(`对答如流！加 10 分。\n出自：${data.source || '未知'}`);
+            showMessage(`对答如流！加 10 分。`);
+            playerBubble.innerHTML += `<br><span class="poem-source">—— ${data.source || '未知'}</span>`;
             
             setTimeout(() => {
                 computerTurn();
@@ -149,6 +150,7 @@ function addPlayerMsg(text) {
     div.innerHTML = highlightKeyword(text);
     chatHistory.appendChild(div);
     scrollToBottom();
+    return div;
 }
 
 function addSystemMsg(text) {
