@@ -53,7 +53,13 @@ async function handlePlayerInput() {
         return;
     }
 
-    if (usedPoems.includes(input)) {
+    const cleanInput = input.replace(/[，。？！、\s]/g, "");
+    const isAlreadyUsed = usedPoems.some(p => {
+        const cleanP = p.replace(/[，。？！、\s]/g, "");
+        return cleanP.includes(cleanInput) || cleanInput.includes(cleanP);
+    });
+
+    if (isAlreadyUsed) {
         showMessage("这句诗已经被用过了！换一句吧。");
         return;
     }

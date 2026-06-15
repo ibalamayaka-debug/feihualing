@@ -138,7 +138,13 @@ async function handleApiRequest(url, env) {
       for (let row of rows) {
         if (!row[3] || !row[3].value) continue;
         const text = row[3].value;
-        const sentences = text.split(/[，。？！\n]/);
+        const parts = text.split(/([。？！\n])/);
+        const sentences = [];
+        for (let i = 0; i < parts.length; i += 2) {
+          if (parts[i].trim()) {
+            sentences.push(parts[i].trim() + (parts[i + 1] || ""));
+          }
+        }
 
         for (let s of sentences) {
           const cleanS = s.trim();
