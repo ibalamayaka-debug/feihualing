@@ -5,6 +5,8 @@ let usedPoems = [];
 const setupArea = document.getElementById("setup-area");
 const gameArea = document.getElementById("game-area");
 const startBtn = document.getElementById("start-btn");
+const customStartBtn = document.getElementById("custom-start-btn");
+const customKeywordInput = document.getElementById("custom-keyword-input");
 const keywordDisplay = document.getElementById("current-keyword");
 const scoreDisplay = document.getElementById("score");
 const inputField = document.getElementById("player-input");
@@ -12,11 +14,10 @@ const submitBtn = document.getElementById("submit-btn");
 const messageBox = document.getElementById("message-box");
 const chatHistory = document.getElementById("chat-history");
 
-const keywords = ["春", "花", "秋", "月", "风", "雪", "夜", "云", "云", "雨", "山", "水", "人"];
+const keywords = ["春", "花", "秋", "月", "风", "雪", "夜", "云", "雨", "山", "水", "人"];
 
-// 初始化游戏
-startBtn.addEventListener("click", () => {
-    currentKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+function startGame(keyword) {
+    currentKeyword = keyword;
     keywordDisplay.innerText = currentKeyword;
     
     score = 0;
@@ -31,6 +32,28 @@ startBtn.addEventListener("click", () => {
     inputField.focus();
     
     addSystemMsg(`游戏开始！请说出一句带有【${currentKeyword}】字的诗词。`);
+}
+
+// 随机初始化游戏
+startBtn.addEventListener("click", () => {
+    const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+    startGame(randomKeyword);
+});
+
+// 自定义初始化游戏
+customStartBtn.addEventListener("click", () => {
+    const val = customKeywordInput.value.trim();
+    if (!val) {
+        alert("请输入一个汉字作为令字！");
+        return;
+    }
+    startGame(val);
+});
+
+customKeywordInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        customStartBtn.click();
+    }
 });
 
 // 提交诗词

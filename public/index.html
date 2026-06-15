@@ -15,7 +15,14 @@
 
         <main>
             <div id="setup-area">
-                <button id="start-btn">抽取令字</button>
+                <div class="setup-controls">
+                    <button id="start-btn">随机抽签</button>
+                    <div class="divider"><span>或</span></div>
+                    <div class="custom-setup">
+                        <input type="text" id="custom-keyword-input" placeholder="输入令字(如: 春)" maxlength="1" autocomplete="off">
+                        <button id="custom-start-btn">以此开局</button>
+                    </div>
+                </div>
             </div>
 
             <div id="game-area" class="hidden">
